@@ -1,0 +1,14 @@
+[Unit]
+Description=zorn: record whether the last boot left a ramoops crash dump
+After=systemd-pstore.service local-fs.target
+Wants=systemd-pstore.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/sbin/zorn-pstore-check.sh
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

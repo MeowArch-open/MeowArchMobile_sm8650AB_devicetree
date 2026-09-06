@@ -1,0 +1,15 @@
+[Unit]
+Description=zorn: watch a modem assert with remoteproc auto-recovery enabled
+After=zorn-net.service
+Wants=zorn-net.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/sbin/zorn-recover-test.sh
+TimeoutStartSec=900
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

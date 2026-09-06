@@ -1,0 +1,18 @@
+[Unit]
+Description=zorn: disable remoteproc auto-recovery before the MPSS is started
+DefaultDependencies=no
+After=systemd-remount-fs.service local-fs.target sys-kernel-debug.mount
+Requires=local-fs.target
+Before=zorn-rmtfs.service zorn-tqftpserv.service zorn-adsp.service multi-user.target
+Conflicts=shutdown.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/sbin/zorn-norecover.sh
+TimeoutStartSec=30
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
