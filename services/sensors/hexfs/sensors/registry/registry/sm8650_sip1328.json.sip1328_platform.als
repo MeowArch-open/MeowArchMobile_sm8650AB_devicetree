@@ -1,0 +1,1 @@
+{"sip1328_platform.als":{"owner":"sns_sip1328","fac_cal":{"type":"grp","ver":"0","data":""},"fac_cal_original":{"type":"grp","ver":"0","data":""}}}

@@ -1,0 +1,1 @@
+{"sip1328.als":{"owner":"sns_sip1328","config":{"type":"grp","ver":"0","data":""}}}

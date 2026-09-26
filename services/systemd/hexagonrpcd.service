@@ -1,0 +1,23 @@
+[Unit]
+Description=HexagonFS file server for the ADSP sensor PD (zorn sensor bring-up)
+After=multi-user.target
+Wants=multi-user.target
+# Safe-by-default: skip the whole unit when the vendor HexagonFS data tree was
+# not shipped into this image (e.g. a build without the sensor blob), the same
+# way the charger validator skips itself when its protected input is absent.
+ConditionPathIsDirectory=/var/lib/hexagonrpcd/hexfs
+
+[Service]
+Type=simple
+# Boot bring-up goes through zorn-sensor-bringup.sh: it does a clean ADSP SSR
+# first, THEN serves HexagonFS, so the SSC re-probes the i2c-hub sensors at a
+# moment their probe succeeds. Plain serve-once only brought up the I3C
+# accel/gyro; the i2c-hub set + fusion virtuals need the post-boot PD probe.
+ExecStartPre=/bin/sleep 8
+ExecStart=/usr/local/sbin/zorn-sensor-bringup.sh
+# Restart=no: this is a one-shot bring-up. With the SSR wrapper an on-failure
+# restart loop would re-SSR the ADSP repeatedly, so never auto-restart.
+Restart=no
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,2 @@
+# HexagonFS acdb mount point. Empty on the zorn device (the sensor PD does not
+# populate it); kept so the served tree shape matches the device.

@@ -1,3 +1,6 @@
 # Safe-by-default: ConditionPathExists skips this validator when no local
 # protected authentication input was supplied during rootfs assembly.
 zorn-charger-auth.service
+# Safe-by-default: ConditionPathIsDirectory skips this bring-up when the vendor
+# HexagonFS data tree (/var/lib/hexagonrpcd/hexfs) was not shipped.
+hexagonrpcd.service
