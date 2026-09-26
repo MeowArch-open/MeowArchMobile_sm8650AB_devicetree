@@ -1,0 +1,3 @@
+# Safe-by-default: ConditionPathExists skips this validator when no local
+# protected authentication input was supplied during rootfs assembly.
+zorn-charger-auth.service

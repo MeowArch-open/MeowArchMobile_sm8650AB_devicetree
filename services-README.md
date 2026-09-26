@@ -8,8 +8,12 @@ it:
 - `display/services/`: Display deployment and probing helpers.
 - `audio/services/`: Audio bring-up scripts, UCM files, and ADSP services.
 - `wifi/services/`: Hostapd/libnl sources and hotspot networking.
-- `common/services/`: only cross-subsystem recovery, pstore, and partition
-  helpers.
+- `common/services/`: cross-subsystem recovery, pstore, and partition
+  helpers, plus the zorn charger authentication service
+  (`charger/` source + `systemd/zorn-charger-auth.service`, enabled via
+  `enabled-multi-user.txt`) and `scripts/zorn-charger-telemetry`. The charger
+  auth binary is compiled by the Builder from `charger/src/`; see
+  `charger/FORMAT.md` for the protected `records.bin` input format.
 
 The copied scripts retain device-specific paths and addresses from the original
 bring-up workspace and should be reviewed before deployment.

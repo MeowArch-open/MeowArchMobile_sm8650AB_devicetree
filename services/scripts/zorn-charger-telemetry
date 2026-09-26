@@ -1,0 +1,84 @@
+#!/bin/sh
+# Read-only snapshot for a short, supervised zorn charger test.
+set -u
+
+PS=/sys/class/power_supply
+BAT=$PS/qcom-battmgr-bat
+USB=$PS/qcom-battmgr-usb
+AUX=/sys/bus/auxiliary/devices
+
+read_node() {
+	label=$1
+	path=$2
+	if [ -r "$path" ]; then
+		value=$(cat "$path" 2>/dev/null) || value=unavailable
+		printf '%-34s %s\n' "$label" "$value"
+	else
+		printf '%-34s %s\n' "$label" unavailable
+	fi
+}
+
+find_diagnostics() {
+	found=
+	count=0
+	for candidate in "$AUX"/pmic_glink.power-supply.*/charger_diagnostics; do
+		[ -d "$candidate" ] || continue
+		found=$candidate
+		count=$((count + 1))
+	done
+	[ "$count" -eq 1 ] || return 1
+	printf '%s\n' "$found"
+}
+
+read_usb_type() {
+	value=$(cat "$USB/usb_type" 2>/dev/null) || value=unavailable
+	selected=$(printf '%s\n' "$value" | sed -n 's/.*\[\([^]]*\)\].*/\1/p')
+	[ -n "$selected" ] || selected=$value
+	printf '%-34s %s\n' usb.type "$selected"
+}
+
+printf 'timestamp                          %s\n' "$(date --iso-8601=seconds 2>/dev/null || date)"
+printf 'kernel                             %s\n' "$(uname -r)"
+
+for spec in \
+	'battery.status:status' \
+	'battery.capacity:capacity' \
+	'battery.voltage_uv:voltage_now' \
+	'battery.current_ua:current_now' \
+	'battery.temp_decic:temp'; do
+	label=${spec%%:*}
+	name=${spec#*:}
+	read_node "$label" "$BAT/$name"
+done
+
+for spec in \
+	'usb.online:online' \
+	'usb.voltage_uv:voltage_now' \
+	'usb.voltage_max_uv:voltage_max' \
+	'usb.current_ua:current_now' \
+	'usb.current_max_ua:current_max' \
+	'usb.input_limit_ua:input_current_limit' \
+	'usb.temp_decic:temp'; do
+	label=${spec%%:*}
+	name=${spec#*:}
+	read_node "$label" "$USB/$name"
+done
+read_usb_type
+
+if diagnostics=$(find_diagnostics); then
+	printf '%-34s %s\n' diagnostics.path "$diagnostics"
+	for name in \
+		usb_adapter_type_raw usb_real_type_raw typec_compliant \
+		connector_temp authentic battery_adapter_power_match \
+		adapter_id adapter_svid pd_verified uvdm_state apdo_max \
+		power_max quick_charge_type; do
+		read_node "diagnostics.$name" "$diagnostics/$name"
+	done
+else
+	printf '%-34s %s\n' diagnostics.path 'unavailable-or-ambiguous'
+fi
+
+if command -v systemctl >/dev/null 2>&1; then
+	printf '%-34s %s\n' auth.service \
+		"$(systemctl is-active zorn-charger-auth.service 2>/dev/null || true)"
+fi
